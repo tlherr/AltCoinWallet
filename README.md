@@ -61,3 +61,7 @@ Armory has its own Type-2 deterministic wallet format based on a "root key" and 
 Earlier versions of Armory required backing up both the "root key" and "chaincode," while newer versions start deriving the 
 chaincode from the private key in a non-reversible way. These newer Armory wallets (0.89+) only require the single, 256-bit root key. 
 This older format is intended to be phased out in favor of the standard BIP0032 format.
+
+###### Possible starting point
+
+https://github.com/bitcoinj/bitcoinj
