@@ -18,8 +18,11 @@ package wallettemplate.controls;
 
 import lib.bitcoinj.core.Address;
 import lib.bitcoinj.uri.BitcoinURI;
+
+
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
+
 import javafx.beans.binding.StringExpression;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
