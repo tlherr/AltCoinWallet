@@ -107,6 +107,7 @@ public class Main extends Application {
         // a future version.
         Threading.USER_THREAD = Platform::runLater;
         // Create the app kit. It won't do any heavyweight initialization until after we start it.
+
         setupWalletKit(null);
 
         if (bitcoin.isChainFileLocked()) {
@@ -125,7 +126,8 @@ public class Main extends Application {
                 GuiUtils.crashAlert(failure);
             }
         }, Platform::runLater);
-        bitcoin.startAsync();
+
+        //bitcoin.startAsync();
 
         scene.getAccelerators().put(KeyCombination.valueOf("Shortcut+F"), () -> bitcoin.peerGroup().getDownloadPeer().close());
     }
@@ -138,19 +140,22 @@ public class Main extends Application {
                 // Don't make the user wait for confirmations for now, as the intention is they're sending it
                 // their own money!
                 bitcoin.wallet().allowSpendingUnconfirmedTransactions();
-                Platform.runLater(controller::onBitcoinSetup);
+                //Platform.runLater(controller::onBitcoinSetup);
             }
         };
         // Now configure and start the appkit. This will take a second or two - we could show a temporary splash screen
         // or progress widget to keep the user engaged whilst we initialise, but we don't.
         if (params == RegTestParams.get()) {
-            bitcoin.connectToLocalHost();   // You should run a regtest mode bitcoind locally.
+            //bitcoin.connectToLocalHost();   // You should run a regtest mode bitcoind locally.
         }
-        bitcoin.setDownloadListener(controller.progressBarUpdater())
-               .setBlockingStartup(false)
-               .setUserAgent(APP_NAME, "1.0");
-        if (seed != null)
-            bitcoin.restoreWalletFromSeed(seed);
+//        bitcoin.setDownloadListener(controller.progressBarUpdater())
+//               .setBlockingStartup(false)
+//               .setUserAgent(APP_NAME, "1.0");
+//        if (seed != null)
+//            bitcoin.restoreWalletFromSeed(seed);
+
+
+
     }
 
     private Node stopClickPane = new Pane();

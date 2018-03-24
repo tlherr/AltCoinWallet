@@ -1,5 +1,7 @@
 # BlockHack2018
 
+[![Build Status](https://travis-ci.org/tlherr/AltCoinWallet.svg?branch=master)](https://travis-ci.org/tlherr/AltCoinWallet)
+
 ## Alt Coin Wallet
 
 Alt Coin Wallet

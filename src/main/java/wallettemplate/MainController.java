@@ -55,24 +55,7 @@ public class MainController {
     }
 
     public void onBitcoinSetup() {
-        model.setWallet(bitcoin.wallet());
-        addressControl.addressProperty().bind(model.addressProperty());
-        balance.textProperty().bind(EasyBind.map(model.balanceProperty(), coin -> MonetaryFormat.BTC.noCode().format(coin).toString()));
-        // Don't let the user click send money when the wallet is empty.
-        sendMoneyOutBtn.disableProperty().bind(model.balanceProperty().isEqualTo(Coin.ZERO));
 
-        showBitcoinSyncMessage();
-        model.syncProgressProperty().addListener(x -> {
-            if (model.syncProgressProperty().get() >= 1.0) {
-                readyToGoAnimation();
-                if (syncItem != null) {
-                    syncItem.cancel();
-                    syncItem = null;
-                }
-            } else if (syncItem == null) {
-                showBitcoinSyncMessage();
-            }
-        });
     }
 
     private void showBitcoinSyncMessage() {
