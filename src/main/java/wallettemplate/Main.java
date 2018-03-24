@@ -46,7 +46,7 @@ import static wallettemplate.utils.GuiUtils.*;
 
 public class Main extends Application {
     public static NetworkParameters params = MainNetParams.get();
-    public static final String APP_NAME = "WalletTemplate";
+    public static final String APP_NAME = "blockHack 2018 Alt Coin Wallet";
     private static final String WALLET_FILE_NAME = APP_NAME.replaceAll("[^a-zA-Z0-9.-]", "_") + "-"
             + params.getPaymentProtocolId();
 

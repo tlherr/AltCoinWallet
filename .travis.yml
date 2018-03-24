@@ -1,0 +1,9 @@
+# configuration for https://travis-ci.org/tlherr/AltCoinWallet
+
+sudo: false
+dist: trusty
+language: java
+jdk: oraclejdk8
+install: true # remove default
+script:
+  - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
