@@ -18,6 +18,8 @@ package wallettemplate;
 
 import com.google.common.util.concurrent.*;
 import javafx.scene.input.*;
+import lib.bitcoinj.core.Address;
+import lib.bitcoinj.core.LegacyAddress;
 import lib.bitcoinj.core.NetworkParameters;
 import lib.bitcoinj.core.Utils;
 import lib.bitcoinj.kits.WalletAppKit;
@@ -33,14 +35,16 @@ import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import lib.clam.util.ConnectionHelper;
 import wallettemplate.controls.NotificationBarPane;
 import wallettemplate.utils.GuiUtils;
 import wallettemplate.utils.TextFieldValidator;
+import wf.bitcoin.javabitcoindrpcclient.BitcoinJSONRPCClient;
 
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
+import java.net.*;
 
 import static wallettemplate.utils.GuiUtils.*;
 
@@ -127,9 +131,23 @@ public class Main extends Application {
             }
         }, Platform::runLater);
 
+
+        //Testing communication with our node
+        BitcoinJSONRPCClient bc = ConnectionHelper.getClient();
+
+        controller.display("Info: \n");
+        controller.display(bc.getInfo().toString());
+
+        controller.display("Mining Info: \n");
+        controller.display(bc.getMiningInfo().toString());
+
+        controller.display("New Address: \n");
+        controller.display(bc.getNewAddress());
+
+
         //bitcoin.startAsync();
 
-        scene.getAccelerators().put(KeyCombination.valueOf("Shortcut+F"), () -> bitcoin.peerGroup().getDownloadPeer().close());
+        //scene.getAccelerators().put(KeyCombination.valueOf("Shortcut+F"), () -> bitcoin.peerGroup().getDownloadPeer().close());
     }
 
     public void setupWalletKit(@Nullable DeterministicSeed seed) {
@@ -141,6 +159,8 @@ public class Main extends Application {
                 // their own money!
                 bitcoin.wallet().allowSpendingUnconfirmedTransactions();
                 //Platform.runLater(controller::onBitcoinSetup);
+
+
             }
         };
         // Now configure and start the appkit. This will take a second or two - we could show a temporary splash screen
@@ -148,13 +168,11 @@ public class Main extends Application {
         if (params == RegTestParams.get()) {
             //bitcoin.connectToLocalHost();   // You should run a regtest mode bitcoind locally.
         }
-//        bitcoin.setDownloadListener(controller.progressBarUpdater())
-//               .setBlockingStartup(false)
-//               .setUserAgent(APP_NAME, "1.0");
-//        if (seed != null)
-//            bitcoin.restoreWalletFromSeed(seed);
-
-
+        bitcoin.setDownloadListener(controller.progressBarUpdater())
+               .setBlockingStartup(false)
+               .setUserAgent(APP_NAME, "1.0");
+        if (seed != null)
+            bitcoin.restoreWalletFromSeed(seed);
 
     }
 

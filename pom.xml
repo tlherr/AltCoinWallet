@@ -28,7 +28,7 @@
 
     <artifactId>wallettemplate</artifactId>
 
-    <name>bitcoinj Wallet-Template</name>
+    <name>blockHack2018 Alt Coin Wallet Demo</name>
 
 
     <build>
@@ -261,6 +261,19 @@
             <groupId>org.fxmisc.easybind</groupId>
             <artifactId>easybind</artifactId>
             <version>1.0.3</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>wf.bitcoin</groupId>
+            <artifactId>JavaBitcoindRpcClient</artifactId>
+            <version>0.9.13</version>
         </dependency>
 
     </dependencies>

@@ -28,6 +28,7 @@ import lib.bitcoinj.protocols.channels.*;
 import lib.bitcoinj.store.*;
 import lib.bitcoinj.wallet.*;
 import org.slf4j.*;
+import wf.bitcoin.javabitcoindrpcclient.BitcoinJSONRPCClient;
 
 import javax.annotation.*;
 import java.io.*;
@@ -85,6 +86,8 @@ public class WalletAppKit extends AbstractIdleService {
     @Nullable protected DeterministicKey restoreFromKey;
     @Nullable protected PeerDiscovery discovery;
 
+    protected BitcoinJSONRPCClient serverConnection;
+
     protected volatile Context context;
 
     /**
@@ -121,6 +124,7 @@ public class WalletAppKit extends AbstractIdleService {
             throw new RuntimeException(e);
         }
     }
+
 
     /** If true, the wallet will save itself to disk automatically whenever it changes. */
     public WalletAppKit setAutoSave(boolean value) {
@@ -244,6 +248,7 @@ public class WalletAppKit extends AbstractIdleService {
      */
     protected void onSetupCompleted() { }
 
+
     /**
      * Tests to see if the spvchain file has an operating system file lock on it. Useful for checking if your app
      * is already running. If another copy of your app is running and you start the appkit anyway, an exception will
@@ -272,112 +277,11 @@ public class WalletAppKit extends AbstractIdleService {
     @Override
     protected void startUp() throws Exception {
         // Runs in a separate thread.
-        Context.propagate(context);
-        if (!directory.exists()) {
-            if (!directory.mkdirs()) {
-                throw new IOException("Could not create directory " + directory.getAbsolutePath());
-            }
-        }
-        log.info("Starting up with directory = {}", directory);
-        try {
-            File chainFile = new File(directory, filePrefix + ".spvchain");
-            boolean chainFileExists = chainFile.exists();
-            vWalletFile = new File(directory, filePrefix + ".wallet");
-            boolean shouldReplayWallet = (vWalletFile.exists() && !chainFileExists) || restoreFromSeed != null || restoreFromKey != null;
-            vWallet = createOrLoadWallet(shouldReplayWallet);
 
-            // Initiate Bitcoin network objects (block store, blockchain and peer group)
-            vStore = provideBlockStore(chainFile);
-            if (!chainFileExists || restoreFromSeed != null || restoreFromKey != null) {
-                if (checkpoints == null && !Utils.isAndroidRuntime()) {
-                    checkpoints = CheckpointManager.openStream(params);
-                }
+        //Make listener
 
-                if (checkpoints != null) {
-                    // Initialize the chain file with a checkpoint to speed up first-run sync.
-                    long time;
-                    if (restoreFromSeed != null) {
-                        time = restoreFromSeed.getCreationTimeSeconds();
-                        if (chainFileExists) {
-                            log.info("Deleting the chain file in preparation from restore.");
-                            vStore.close();
-                            if (!chainFile.delete())
-                                throw new IOException("Failed to delete chain file in preparation for restore.");
-                            vStore = new SPVBlockStore(params, chainFile);
-                        }
-                    } else if (restoreFromKey != null) {
-                        time = restoreFromKey.getCreationTimeSeconds();
-                        if (chainFileExists) {
-                            log.info("Deleting the chain file in preparation from restore.");
-                            vStore.close();
-                            if (!chainFile.delete())
-                                throw new IOException("Failed to delete chain file in preparation for restore.");
-                            vStore = new SPVBlockStore(params, chainFile);
-                        }
-                    }
-                    else
-                    {
-                        time = vWallet.getEarliestKeyCreationTime();
-                    }
-                    if (time > 0)
-                        CheckpointManager.checkpoint(params, checkpoints, vStore, time);
-                    else
-                        log.warn("Creating a new uncheckpointed block store due to a wallet with a creation time of zero: this will result in a very slow chain sync");
-                } else if (chainFileExists) {
-                    log.info("Deleting the chain file in preparation from restore.");
-                    vStore.close();
-                    if (!chainFile.delete())
-                        throw new IOException("Failed to delete chain file in preparation for restore.");
-                    vStore = new SPVBlockStore(params, chainFile);
-                }
-            }
-            vChain = new BlockChain(params, vStore);
-            vPeerGroup = createPeerGroup();
-            if (this.userAgent != null)
-                vPeerGroup.setUserAgent(userAgent, version);
+        onSetupCompleted();
 
-            // Set up peer addresses or discovery first, so if wallet extensions try to broadcast a transaction
-            // before we're actually connected the broadcast waits for an appropriate number of connections.
-            if (peerAddresses != null) {
-                for (PeerAddress addr : peerAddresses) vPeerGroup.addAddress(addr);
-                vPeerGroup.setMaxConnections(peerAddresses.length);
-                peerAddresses = null;
-            } else if (!params.getId().equals(NetworkParameters.ID_REGTEST)) {
-                vPeerGroup.addPeerDiscovery(discovery != null ? discovery : new DnsDiscovery(params));
-            }
-            vChain.addWallet(vWallet);
-            vPeerGroup.addWallet(vWallet);
-            onSetupCompleted();
-
-            if (blockingStartup) {
-                vPeerGroup.start();
-                // Make sure we shut down cleanly.
-                installShutdownHook();
-                completeExtensionInitiations(vPeerGroup);
-
-                // TODO: Be able to use the provided download listener when doing a blocking startup.
-                final DownloadProgressTracker listener = new DownloadProgressTracker();
-                vPeerGroup.startBlockChainDownload(listener);
-                listener.await();
-            } else {
-                Futures.addCallback(vPeerGroup.startAsync(), new FutureCallback() {
-                    @Override
-                    public void onSuccess(@Nullable Object result) {
-                        completeExtensionInitiations(vPeerGroup);
-                        final DownloadProgressTracker l = downloadListener == null ? new DownloadProgressTracker() : downloadListener;
-                        vPeerGroup.startBlockChainDownload(l);
-                    }
-
-                    @Override
-                    public void onFailure(Throwable t) {
-                        throw new RuntimeException(t);
-
-                    }
-                });
-            }
-        } catch (BlockStoreException e) {
-            throw new IOException(e);
-        }
     }
 
     private Wallet createOrLoadWallet(boolean shouldReplayWallet) throws Exception {

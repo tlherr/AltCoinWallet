@@ -16,6 +16,8 @@
 
 package wallettemplate;
 
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import lib.bitcoinj.core.listeners.DownloadProgressTracker;
 import lib.bitcoinj.core.Coin;
 import lib.bitcoinj.utils.MonetaryFormat;
@@ -45,6 +47,7 @@ public class MainController {
     public Label balance;
     public Button sendMoneyOutBtn;
     public ClickableBitcoinAddress addressControl;
+    public TextArea consoleBox;
 
     private BitcoinUIModel model = new BitcoinUIModel();
     private NotificationBarPane.Item syncItem;
@@ -56,6 +59,10 @@ public class MainController {
 
     public void onBitcoinSetup() {
 
+    }
+
+    public void display(String message) {
+        consoleBox.setText(consoleBox.getText()+message);
     }
 
     private void showBitcoinSyncMessage() {
